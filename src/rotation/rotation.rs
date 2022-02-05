@@ -2,7 +2,7 @@ pub enum Rotation {
     R0,
     R90,
     R180,
-    R270
+    R270,
 }
 
 impl Rotation {
@@ -32,4 +32,3 @@ impl Rotation {
         };
     }
 }
-

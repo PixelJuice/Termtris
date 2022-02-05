@@ -6,7 +6,7 @@
     "configurations": [
         {
             "name": "(Windows) Launch",
-            "type": "cppvsdbg",
+            "type": "lldb",
             "request": "launch",
             "program": "${workspaceFolder}/target/debug/tetris.exe",
             "args": [],

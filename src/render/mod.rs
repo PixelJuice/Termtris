@@ -1,9 +1,9 @@
+pub mod block;
 pub mod frame;
 pub mod screen;
 pub mod text;
-pub mod block;
-pub use self::frame::Frame;
 pub use self::block::Block;
+pub use self::frame::Frame;
 pub use self::frame::FrameStyle;
 pub use self::screen::Screen;
 pub use self::text::Text;

@@ -1,5 +1,5 @@
-use crossterm::style::Color;
 use super::screen::ScreenElement;
+use crossterm::style::Color;
 
 pub struct Text {
     buffer: String,
@@ -10,7 +10,7 @@ pub struct Text {
 }
 
 impl Text {
-    pub fn new(text: String, foreground_color: Color, background_color: Color) -> Text{
+    pub fn new(text: String, foreground_color: Color, background_color: Color) -> Text {
         Text {
             width: text.len() as u16,
             buffer: text,
@@ -22,11 +22,19 @@ impl Text {
 }
 
 impl ScreenElement for Text {
-    fn get_width(&self) -> u16 { self.width }
-    fn get_height(&self) -> u16 { self.height }
-    fn get_foreground_color(&self, _x: u16, _y: u16) -> Color { self.foreground_color }
-    fn get_background_color(&self, _x: u16, _y: u16) -> Color { self.background_color }
-    fn get_part(&self, x: u16, y: u16) -> char { 
-        self.buffer.as_bytes()[(y*self.width+x) as usize] as char
-     }
+    fn get_width(&self) -> u16 {
+        self.width
+    }
+    fn get_height(&self) -> u16 {
+        self.height
+    }
+    fn get_foreground_color(&self, _x: u16, _y: u16) -> Color {
+        self.foreground_color
+    }
+    fn get_background_color(&self, _x: u16, _y: u16) -> Color {
+        self.background_color
+    }
+    fn get_part(&self, x: u16, y: u16) -> char {
+        self.buffer.as_bytes()[(y * self.width + x) as usize] as char
+    }
 }
