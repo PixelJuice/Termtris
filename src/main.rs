@@ -109,7 +109,7 @@ fn main() -> Result<()> {
     //Run=====================================================================
 
     intro()?;
-    run_game(&tetromino, &screen_settings)?;
+    run_game(tetromino, &screen_settings)?;
 
     //Exit=================================================================
 
@@ -122,8 +122,8 @@ fn quit() -> Result<()> {
     Ok(())
 }
 
-fn run_game(tetromino: &Vec<String>, screen_settings: &ScreenSetting) -> Result<()> {
-    let mut field = create_initial_field(&screen_settings);
+fn run_game(tetromino: Vec<String>, screen_settings: &ScreenSetting) -> Result<()> {
+    let mut field = create_initial_field(screen_settings);
     let mut piece = TetrisShape::new(screen_settings.field_width / 2, 0);
     let mut input_state = Input::new();
     let duration = time::Duration::from_millis(50);
@@ -145,14 +145,14 @@ fn run_game(tetromino: &Vec<String>, screen_settings: &ScreenSetting) -> Result<
             &mut input_state,
             &mut piece,
             &tetromino,
-            &screen_settings,
+            screen_settings,
             &field,
         );
         if ticks % handicap == 0 {
             piece = move_down(
                 piece,
                 &tetromino,
-                &screen_settings,
+                screen_settings,
                 &mut field,
                 &mut lines,
                 &mut game_over,
@@ -170,7 +170,7 @@ fn run_game(tetromino: &Vec<String>, screen_settings: &ScreenSetting) -> Result<
         screen.end_render()?;
         ticks += 1;
         thread::sleep(duration);
-        points += add_points_to_score(&mut lines, &screen_settings, &mut field);
+        points += add_points_to_score(&mut lines, screen_settings, &mut field);
     }
     Ok(())
 }
@@ -186,7 +186,7 @@ fn intro() -> Result<()> {
     }
 }
 
-fn render_current_piece(tetromino: &Vec<String>, screen: &mut Screen, piece: &TetrisShape) {
+fn render_current_piece(tetromino: &[String], screen: &mut Screen, piece: &TetrisShape) {
     for px in 0..4 {
         for py in 0..4 {
             let char_as_bytes: u8 = tetromino[piece.current_piece as usize].as_bytes()
@@ -205,7 +205,7 @@ fn add_points_to_score(
     screen_settings: &ScreenSetting,
     field: &mut Block,
 ) -> u16 {
-    if lines.len() > 0 {
+    if !lines.is_empty() {
         let score_duration = time::Duration::from_millis(400);
         thread::sleep(score_duration);
         for elem in lines.to_owned() {
@@ -262,7 +262,7 @@ fn set_input(input_state: &mut Input, game_over: &mut bool) -> Result<()> {
 
 fn move_down(
     mut p_shape: TetrisShape,
-    p_tetromino: &Vec<String>,
+    p_tetromino: &[String],
     p_screen: &ScreenSetting,
     p_field: &mut Block,
     p_lines: &mut Vec<i16>,
@@ -290,10 +290,8 @@ fn move_down(
         p_shape = TetrisShape::new(p_screen.field_width / 2, 0);
 
         *pieces_spawned += 1;
-        if *pieces_spawned % 10 == 0 {
-            if *difficulty_handicap > 5 {
-                *difficulty_handicap -= 1;
-            }
+        if *pieces_spawned % 10 == 0 && *difficulty_handicap > 5 {
+            *difficulty_handicap -= 1;
         }
         *game_over = !does_piece_fit(
             p_tetromino,
@@ -308,7 +306,7 @@ fn move_down(
     p_shape
 }
 
-fn lock_piece(p_shape: &TetrisShape, p_tetromino: &Vec<String>, p_field: &mut Block) {
+fn lock_piece(p_shape: &TetrisShape, p_tetromino: &[String], p_field: &mut Block) {
     for px in 0..4 {
         for py in 0..4 {
             let char_as_bytes: u8 = p_tetromino[p_shape.current_piece as usize].as_bytes()
@@ -358,12 +356,12 @@ fn test_full_lines(
 fn move_shape(
     input_state: &mut Input,
     p_state: &mut TetrisShape,
-    p_tetromino: &Vec<String>,
+    p_tetromino: &[String],
     p_screen: &ScreenSetting,
     p_field: &Block,
 ) {
-    if input_state.left {
-        if does_piece_fit(
+    if input_state.left
+        && does_piece_fit(
             p_tetromino,
             p_state.current_piece,
             &p_state.current_rotation,
@@ -371,12 +369,12 @@ fn move_shape(
             p_state.current_y,
             p_screen,
             p_field,
-        ) {
-            p_state.current_x -= 1;
-        }
+        )
+    {
+        p_state.current_x -= 1;
     }
-    if input_state.right {
-        if does_piece_fit(
+    if input_state.right
+        && does_piece_fit(
             p_tetromino,
             p_state.current_piece,
             &p_state.current_rotation,
@@ -384,12 +382,12 @@ fn move_shape(
             p_state.current_y,
             p_screen,
             p_field,
-        ) {
-            p_state.current_x += 1;
-        }
+        )
+    {
+        p_state.current_x += 1;
     }
-    if input_state.down {
-        if does_piece_fit(
+    if input_state.down
+        && does_piece_fit(
             p_tetromino,
             p_state.current_piece,
             &p_state.current_rotation,
@@ -397,9 +395,9 @@ fn move_shape(
             p_state.current_y + 1,
             p_screen,
             p_field,
-        ) {
-            p_state.current_y += 1;
-        }
+        )
+    {
+        p_state.current_y += 1;
     }
 
     if input_state.rotate {
@@ -419,7 +417,7 @@ fn move_shape(
 }
 
 fn does_piece_fit(
-    p_tetromino: &Vec<String>,
+    p_tetromino: &[String],
     p_tetrino: i16,
     p_rotation: &Rotation,
     p_pos_x: i16,
@@ -429,17 +427,14 @@ fn does_piece_fit(
 ) -> bool {
     for px in 0..4 {
         for py in 0..4 {
-            let piece_index = Rotation::rotate(px, py, &p_rotation);
+            let piece_index = Rotation::rotate(px, py, p_rotation);
             let field_index = ((p_pos_y + py) * p_screen.field_width + (p_pos_x + px)) as usize;
-            if (p_pos_x + px) < p_screen.field_width {
-                if (p_pos_y + py) < p_screen.field_height {
-                    if p_tetromino[p_tetrino as usize].as_bytes()[piece_index as usize] as char
-                        == 'X'
-                        && *p_field.get_content_by_index(field_index) != ' '
-                    {
-                        return false;
-                    }
-                }
+            if (p_pos_x + px) < p_screen.field_width
+                && (p_pos_y + py) < p_screen.field_height
+                && p_tetromino[p_tetrino as usize].as_bytes()[piece_index as usize] as char == 'X'
+                && *p_field.get_content_by_index(field_index) != ' '
+            {
+                return false;
             }
         }
     }

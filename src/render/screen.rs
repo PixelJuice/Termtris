@@ -74,13 +74,13 @@ impl Screen {
         pos_y: u16,
     ) {
         let mut iter = 0;
-        for this_char in text.chars() {
+        text.chars().for_each(|this_char| {
             let index = ((pos_y) * self.width + (pos_x + iter)) as usize;
             self.buffer[index] = this_char;
             self.foreground_colors[index] = foreground_color;
             self.background_colors[index] = background_color;
             iter += 1;
-        }
+        });
     }
 
     pub fn end_render(&self) -> Result<()> {
